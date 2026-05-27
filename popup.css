@@ -1,0 +1,129 @@
+:root {
+  color-scheme: light;
+  --ink: #162239;
+  --muted: #637083;
+  --line: #dde4ee;
+  --accent: #2757d8;
+  --success: #087443;
+  --error: #b42318;
+  --surface: #ffffff;
+  --page: #f5f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 13px/1.4 Arial, sans-serif;
+}
+
+.card {
+  padding: 18px;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin: 0 0 4px;
+}
+
+h1 {
+  font-size: 23px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 6px;
+}
+
+.subtle {
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+button {
+  background: var(--accent);
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 14px;
+  width: 100%;
+}
+
+button:hover {
+  filter: brightness(0.95);
+}
+
+button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.status {
+  color: var(--muted);
+  min-height: 18px;
+  margin: 12px 0;
+}
+
+.status.success {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.status.error {
+  color: var(--error);
+}
+
+.preview {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-top: 10px;
+  padding: 10px 12px;
+}
+
+.hidden {
+  display: none;
+}
+
+dl {
+  margin: 0;
+}
+
+dl div {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 82px 1fr;
+  padding: 7px 0;
+}
+
+dl div:last-child {
+  border-bottom: 0;
+}
+
+dt {
+  color: var(--muted);
+}
+
+dd {
+  font-weight: 600;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 15px;
+  padding-top: 11px;
+}

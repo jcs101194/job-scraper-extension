@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Job Row Copier</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="card">
+      <header>
+        <p class="eyebrow">JOB SEARCH 2026</p>
+        <h1>Copy job row</h1>
+        <p class="subtle">Indeed or ZipRecruiter → one spreadsheet-ready row</p>
+      </header>
+
+      <button id="copyButton" type="button">Copy spreadsheet row</button>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+
+      <section id="preview" class="preview hidden" aria-label="Scraped values">
+        <dl>
+          <div><dt>Position</dt><dd id="position"></dd></div>
+          <div><dt>Company</dt><dd id="company"></dd></div>
+          <div><dt>Pay</dt><dd id="pay"></dd></div>
+          <div><dt>Commute</dt><dd id="commute"></dd></div>
+          <div><dt>Type</dt><dd id="employmentType"></dd></div>
+          <div><dt>Flags</dt><dd id="flags"></dd></div>
+        </dl>
+      </section>
+
+      <footer>
+        Blank by design: ID, Sector, submission/tracking, POC, Status, Comments.
+      </footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

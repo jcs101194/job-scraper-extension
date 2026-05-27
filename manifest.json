@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Job Row Copier",
+  "version": "0.1.0",
+  "description": "Copies an Indeed or ZipRecruiter job posting as one spreadsheet-ready TSV row.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "clipboardWrite"
+  ],
+  "icons": {
+    "16": "charlieBit.png",
+    "32": "charlieBit.png",
+    "48": "charlieBit.png",
+    "128": "charlieBit.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "charlieBit.png",
+      "32": "charlieBit.png",
+      "48": "charlieBit.png",
+      "128": "charlieBit.png"
+    },
+    "default_popup": "popup.html",
+    "default_title": "Copy job row"
+  }
+}
