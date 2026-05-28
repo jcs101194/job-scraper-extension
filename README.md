@@ -6,7 +6,7 @@ A private, local Chrome extension that copies an **Indeed** or **ZipRecruiter** 
 
 The copied row is ordered exactly as, starting after your manually entered `ID` cell:
 
-`Position | Company | Sector | Industry | Requirements | Pay | Commute | Employement Type | App Submisison Date | # of Apps. | Response Sentiment | POC Name | POC Number | Status | Flags | Link | Comments`
+`Position | Company | Sector | Industry | Requirements | Pay | Commute | Employement Type | App Submisison Date | Response Date | Turnaround Time | # of Apps. | Response Sentiment | POC Name | POC Number | Status | Flags | Link | Comments`
 
 Automatically populated:
 
@@ -25,7 +25,7 @@ Automatically populated:
 
 Intentionally left blank:
 
-`ID`, `# of Apps.`, `POC Name`, `POC Number`, `Status`, and `Comments`.
+`ID`, `Response Date`, `Turnaround Time`, `# of Apps.`, `POC Name`, `POC Number`, `Status`, and `Comments`.
 
 ## Install in Chrome
 
