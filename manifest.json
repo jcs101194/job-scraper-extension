@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Job Row Copier",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "Copies an Indeed or ZipRecruiter job posting as one spreadsheet-ready TSV row.",
   "permissions": [
     "activeTab",
