@@ -21,7 +21,7 @@
         "responseDate",
         "turnaroundTime",
         "applicationCount",
-        "responseSentiment",
+        "personalInterestLevel",
         "pocName",
         "pocNumber",
         "status",
@@ -304,6 +304,59 @@
         }
 
         return safeCell(unit && amount ? `${amount} / ${unit}` : amount);
+    }
+
+    function extractPayAmounts(value)
+    {
+        const amounts = [];
+        const pattern = /\$?\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*([kK])?/g;
+        let match;
+
+        while ((match = pattern.exec(value)) !== null)
+        {
+            const numeric = Number(match[1].replace(/,/g, ""));
+
+            if (!Number.isFinite(numeric))
+            {
+                continue;
+            }
+
+            amounts.push(match[2] ? numeric * 1000 : numeric);
+        }
+
+        return amounts;
+    }
+
+    function formatPayAmountAsK(value)
+    {
+        const amount = value >= 1000 ? value / 1000 : value;
+        return `$${Math.round(amount)}k`;
+    }
+
+    function formatPay(value)
+    {
+        const text = safeCell(value);
+
+        if (!text)
+        {
+            return "";
+        }
+
+        const lower = text.toLowerCase();
+        const hasHourlySignal = /\b(?:hour|hourly|hr)\b|\/\s*h\b/.test(lower);
+        const hasAnnualSignal = /\b(?:year|yr|annual|annually|salary)\b|\/\s*yr\b/.test(lower);
+        const amounts = extractPayAmounts(text);
+        const looksLikeSalary = hasAnnualSignal || (!hasHourlySignal && amounts.some((amount) => amount >= 1000));
+
+        if (!looksLikeSalary || !amounts.length)
+        {
+            return text;
+        }
+
+        const min = Math.min(...amounts);
+        const max = Math.max(...amounts);
+
+        return `${formatPayAmountAsK(min)} - ${formatPayAmountAsK(max)}/yr`;
     }
 
     function normalizeEmploymentType(value)
@@ -755,14 +808,14 @@
             sector: "-",
             industry: "-",
             requirements: formatRequirements(fields.requirements),
-            pay: fields.pay,
+            pay: formatPay(fields.pay),
             commute: normalizeCommute(fields.commute, fields.flags),
             employmentType: normalizeSheetEmploymentType(fields.employmentType),
             applicationSubmissionDate: formatToday(),
             responseDate: "",
             turnaroundTime: "",
             applicationCount: "",
-            responseSentiment: "Low",
+            personalInterestLevel: "Low",
             pocName: "",
             pocNumber: "",
             status: "",
