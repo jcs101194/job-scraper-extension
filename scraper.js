@@ -22,12 +22,13 @@
         "turnaroundTime",
         "applicationCount",
         "fitScore",
-        "personalInterestLevel",
+        "sentimentScore",
         "pocName",
         "pocNumber",
         "status",
         "flags",
         "link",
+        "candidatePortal",
         "comments"
     ];
 
@@ -812,12 +813,13 @@
             turnaroundTime: "",
             applicationCount: "",
             fitScore: "Low",
-            personalInterestLevel: "Low",
+            sentimentScore: "Low",
             pocName: "",
             pocNumber: "",
             status: "",
             flags: "",
             link: fields.link,
+            candidatePortal: "",
             comments: ""
         };
 
