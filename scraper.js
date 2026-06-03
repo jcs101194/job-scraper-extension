@@ -384,11 +384,6 @@
         {
             flags.push("Hybrid");
         }
-        if (/\bon[- ]?site\b|\bin[- ]person\b/i.test(searchable))
-        {
-            flags.push("On-site");
-        }
-
         return [...new Set(flags)].join(", ");
     }
 
@@ -816,12 +811,12 @@
             responseDate: "",
             turnaroundTime: "",
             applicationCount: "",
-            fitScore: "",
+            fitScore: "Low",
             personalInterestLevel: "Low",
             pocName: "",
             pocNumber: "",
             status: "",
-            flags: fields.flags,
+            flags: "",
             link: fields.link,
             comments: ""
         };
