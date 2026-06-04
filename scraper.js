@@ -819,7 +819,7 @@
             status: "",
             flags: "",
             link: fields.link,
-            candidatePortal: "",
+            candidatePortal: "-",
             comments: ""
         };
 
