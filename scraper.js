@@ -676,7 +676,12 @@
 
     function linkedinVisibleTexts(root = document)
     {
-        return uniqueTexts([...root.querySelectorAll("h1, h2, h3, p, li, a, span, button")]
+        const nodes = [
+            ...root.querySelectorAll("h1, h2, h3, p, li, a, span, button"),
+            ...document.querySelectorAll("h1, h2, h3, p, li, a, span, button")
+        ];
+
+        return uniqueTexts(nodes
             .map(textFromNode)
             .filter((text) =>
                 text
@@ -687,6 +692,18 @@
                 && !/^learn more$/i.test(text)
                 && !/^follow$/i.test(text)
             ));
+    }
+
+    function linkedinChipTexts(root = document)
+    {
+        const nodes = [
+            ...root.querySelectorAll("a, span"),
+            ...document.querySelectorAll("a, span")
+        ];
+
+        return uniqueTexts(nodes
+            .map(textFromNode)
+            .filter((text) => text && text.length <= 80));
     }
 
     function findLinkedInJobRoot()
@@ -717,20 +734,40 @@
 
     function findLinkedInCompany(root, posting)
     {
-        const labeledCompany = [...root.querySelectorAll("[aria-label]")]
+        const labeledCompany = [
+            ...root.querySelectorAll("[aria-label], img[alt]"),
+            ...document.querySelectorAll("[aria-label], img[alt]")
+        ]
+            .map((node) => node.getAttribute("aria-label") || node.getAttribute("alt") || "")
+            .map((label) =>
+                label.match(/^Company,\s*(.+?)\.?$/i)?.[1]
+                || label.match(/^Company logo for,\s*(.+?)\.?$/i)?.[1]
+                || ""
+            )
+            .find(Boolean);
+        const linkedCompany = [
+            ...root.querySelectorAll('a[href*="/company/"]'),
+            ...document.querySelectorAll('a[href*="/company/"]')
+        ]
             .map((node) => node.getAttribute("aria-label") || "")
-            .map((label) => label.match(/^Company,\s*(.+?)\.?$/i)?.[1] || "")
+            .concat([
+                ...root.querySelectorAll('a[href*="/company/"]'),
+                ...document.querySelectorAll('a[href*="/company/"]')
+            ].map(textFromNode))
+            .map((text) => safeCell(text).replace(/^Company,\s*/i, "").replace(/\.$/, ""))
+            .filter((text) =>
+                text
+                && !/\b(?:show|follow|followers|employees|linkedin|insights|jobs)\b/i.test(text)
+                && text.length <= 80
+            )
             .find(Boolean);
 
-        return safeCell(organizationName(posting) || labeledCompany || firstText([
-            'a[href*="/company/"][href*="/life"]',
-            'a[href*="/company/"]'
-        ], root));
+        return safeCell(organizationName(posting) || labeledCompany || linkedCompany);
     }
 
     function findLinkedInPay(root)
     {
-        return linkedinVisibleTexts(root).find((text) =>
+        return linkedinChipTexts(root).find((text) =>
             /[$\u00a3\u20ac]\s?\d/i.test(text)
             && /\b(?:k|hour|hr|year|yr|annual|salary)\b|\/\s*(?:yr|h)/i.test(text)
         ) || "";
@@ -738,14 +775,14 @@
 
     function findLinkedInCommute(root)
     {
-        return linkedinVisibleTexts(root).find((text) =>
+        return linkedinChipTexts(root).find((text) =>
             /^(?:remote|hybrid|on[- ]?site|in[- ]person)$/i.test(text)
         ) || "";
     }
 
     function findLinkedInEmploymentType(root, posting)
     {
-        return safeCell(normalizeEmploymentType(posting.employmentType) || linkedinVisibleTexts(root).find((text) =>
+        return safeCell(normalizeEmploymentType(posting.employmentType) || linkedinChipTexts(root).find((text) =>
             /^(?:full[- ]?time|part[- ]?time|contract|temporary|internship|per diem)$/i.test(text)
         ) || "");
     }
