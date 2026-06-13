@@ -35,7 +35,9 @@ function isSupportedUrl(url)
         return hostname === "indeed.com"
             || hostname.endsWith(".indeed.com")
             || hostname === "ziprecruiter.com"
-            || hostname.endsWith(".ziprecruiter.com");
+            || hostname.endsWith(".ziprecruiter.com")
+            || hostname === "linkedin.com"
+            || hostname.endsWith(".linkedin.com");
     }
     catch
     {
@@ -76,7 +78,7 @@ copyButton.addEventListener("click", async () =>
 
         if (!isSupportedUrl(tab.url || ""))
         {
-            throw new Error("Open an Indeed or ZipRecruiter job posting first.");
+            throw new Error("Open an Indeed, ZipRecruiter, or LinkedIn job posting first.");
         }
 
         const response = await scrapeActiveTab(tab.id);
