@@ -721,8 +721,18 @@
 
     function findLinkedInTitle(root, posting)
     {
-        return safeCell(posting.title || firstText([
-            'a[href*="/jobs/view/"]',
+        const linkedTitle = [
+            ...root.querySelectorAll('a[href*="/jobs/view/"]'),
+            ...document.querySelectorAll('a[href*="/jobs/view/"]')
+        ]
+            .map(textFromNode)
+            .find((text) =>
+                text
+                && text.length <= 160
+                && !/^verified job$/i.test(text)
+            );
+
+        return safeCell(linkedTitle || posting.title || firstText([
             "h1",
             "h2"
         ], root));
