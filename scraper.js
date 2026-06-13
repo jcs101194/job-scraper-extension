@@ -714,13 +714,9 @@
             || document;
     }
 
-    function findLinkedInJobUrl(root = document)
+    function findLinkedInJobUrl()
     {
-        const link = root.querySelector('a[href*="/jobs/view/"]')?.href
-            || (window.location.href.includes("/jobs/view/") ? window.location.href : "");
-        const match = link.match(/\/jobs\/view\/(\d+)/);
-
-        return match ? `https://www.linkedin.com/jobs/view/${match[1]}/` : safeCell(absoluteUrl(link) || canonicalUrl());
+        return safeCell(window.location.href);
     }
 
     function findLinkedInTitle(root, posting)
@@ -949,7 +945,7 @@
             commute,
             employmentType: findLinkedInEmploymentType(root, posting),
             flags: detectFlags(title, commute, description),
-            link: findLinkedInJobUrl(root)
+            link: findLinkedInJobUrl()
         };
     }
 
