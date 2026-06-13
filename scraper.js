@@ -643,6 +643,162 @@
             );
     }
 
+    function uniqueTexts(values)
+    {
+        const seen = new Set();
+
+        return values.filter((value) =>
+        {
+            const text = safeCell(value);
+            const key = text.toLowerCase();
+
+            if (!text || seen.has(key))
+            {
+                return false;
+            }
+
+            seen.add(key);
+            return true;
+        });
+    }
+
+    function absoluteUrl(value)
+    {
+        try
+        {
+            return new URL(value, window.location.origin).href;
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    function linkedinVisibleTexts(root = document)
+    {
+        return uniqueTexts([...root.querySelectorAll("h1, h2, h3, p, li, a, span, button")]
+            .map(textFromNode)
+            .filter((text) =>
+                text
+                && text.length < 2000
+                && !/^save$/i.test(text)
+                && !/^apply$/i.test(text)
+                && !/^show more$/i.test(text)
+                && !/^learn more$/i.test(text)
+                && !/^follow$/i.test(text)
+            ));
+    }
+
+    function findLinkedInJobRoot()
+    {
+        return document.querySelector("[data-component-type='LazyColumn']")
+            || document.querySelector("main")
+            || document.body
+            || document;
+    }
+
+    function findLinkedInJobUrl(root = document)
+    {
+        const link = root.querySelector('a[href*="/jobs/view/"]')?.href
+            || (window.location.href.includes("/jobs/view/") ? window.location.href : "");
+        const match = link.match(/\/jobs\/view\/(\d+)/);
+
+        return match ? `https://www.linkedin.com/jobs/view/${match[1]}/` : safeCell(absoluteUrl(link) || canonicalUrl());
+    }
+
+    function findLinkedInTitle(root, posting)
+    {
+        return safeCell(posting.title || firstText([
+            'a[href*="/jobs/view/"]',
+            "h1",
+            "h2"
+        ], root));
+    }
+
+    function findLinkedInCompany(root, posting)
+    {
+        const labeledCompany = [...root.querySelectorAll("[aria-label]")]
+            .map((node) => node.getAttribute("aria-label") || "")
+            .map((label) => label.match(/^Company,\s*(.+?)\.?$/i)?.[1] || "")
+            .find(Boolean);
+
+        return safeCell(organizationName(posting) || labeledCompany || firstText([
+            'a[href*="/company/"][href*="/life"]',
+            'a[href*="/company/"]'
+        ], root));
+    }
+
+    function findLinkedInPay(root)
+    {
+        return linkedinVisibleTexts(root).find((text) =>
+            /[$\u00a3\u20ac]\s?\d/i.test(text)
+            && /\b(?:k|hour|hr|year|yr|annual|salary)\b|\/\s*(?:yr|h)/i.test(text)
+        ) || "";
+    }
+
+    function findLinkedInCommute(root)
+    {
+        return linkedinVisibleTexts(root).find((text) =>
+            /^(?:remote|hybrid|on[- ]?site|in[- ]person)$/i.test(text)
+        ) || "";
+    }
+
+    function findLinkedInEmploymentType(root, posting)
+    {
+        return safeCell(normalizeEmploymentType(posting.employmentType) || linkedinVisibleTexts(root).find((text) =>
+            /^(?:full[- ]?time|part[- ]?time|contract|temporary|internship|per diem)$/i.test(text)
+        ) || "");
+    }
+
+    function findLinkedInIndustry(root)
+    {
+        const texts = linkedinVisibleTexts(root);
+        const aboutIndex = texts.findIndex((text) => /^about the company$/i.test(text));
+        const scopedTexts = aboutIndex >= 0 ? texts.slice(aboutIndex + 1, aboutIndex + 12) : texts;
+
+        return scopedTexts.find((text) =>
+            !/[0-9]/.test(text)
+            && !/\b(?:followers|employees|linkedin|company|hired|interested|working|future)\b/i.test(text)
+            && /^[A-Z][A-Za-z&,\- ]+$/.test(text)
+        ) || "";
+    }
+
+    function findLinkedInDescription(root, posting)
+    {
+        const structuredDescription = safeCell(htmlToText(posting.description), MAX_DESCRIPTION_LENGTH);
+
+        if (structuredDescription)
+        {
+            return structuredDescription;
+        }
+
+        const texts = linkedinVisibleTexts(root);
+        const startIndex = texts.findIndex((text) => /^(?:about the job|job description|description)$/i.test(text));
+
+        if (startIndex < 0)
+        {
+            return "";
+        }
+
+        const stopPattern = /^(?:about the company|determine your fit|show premium insights|interested in working with us|similar jobs|people also viewed)$/i;
+        const descriptionParts = [];
+
+        for (const text of texts.slice(startIndex + 1))
+        {
+            if (stopPattern.test(text))
+            {
+                break;
+            }
+
+            if (!/^see more$/i.test(text))
+            {
+                descriptionParts.push(text);
+            }
+        }
+
+        return safeCell(descriptionParts.join("\n"), MAX_DESCRIPTION_LENGTH);
+    }
+
     function scrapeIndeed(posting)
     {
         const salaryAndType = splitIndeedSalaryAndJobType(firstText(["#salaryInfoAndJobType"]));
@@ -738,6 +894,28 @@
         };
     }
 
+    function scrapeLinkedIn(posting)
+    {
+        const root = findLinkedInJobRoot();
+        const title = findLinkedInTitle(root, posting);
+        const company = findLinkedInCompany(root, posting);
+        const description = findLinkedInDescription(root, posting);
+        const commute = safeCell(structuredLocation(posting) || findLinkedInCommute(root));
+
+        return {
+            source: "LinkedIn",
+            position: title,
+            company,
+            industry: safeCell(posting.industry || findLinkedInIndustry(root)),
+            requirements: description,
+            pay: safeCell(formatSalary(posting) || findLinkedInPay(root)),
+            commute,
+            employmentType: findLinkedInEmploymentType(root, posting),
+            flags: detectFlags(title, commute, description),
+            link: findLinkedInJobUrl(root)
+        };
+    }
+
     function scrapeGeneric(posting)
     {
         const description = safeCell(
@@ -792,6 +970,11 @@
         if (host === "ziprecruiter.com" || host.endsWith(".ziprecruiter.com"))
         {
             return scrapeZipRecruiter;
+        }
+
+        if (host === "linkedin.com" || host.endsWith(".linkedin.com"))
+        {
+            return scrapeLinkedIn;
         }
 
         return scrapeGeneric;
